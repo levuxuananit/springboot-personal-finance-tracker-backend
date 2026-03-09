@@ -35,8 +35,8 @@ public class AuthServiceImpl implements AuthService {
     public RegisterResponse register(RegisterRequest request) {
 
         // 1. Kiểm tra email tồn tại
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new ApiException(HttpStatus.CONFLICT, "Email is already registered");
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Email already exists");
         }
 
         // 2. Lấy role USER mặc định
@@ -69,12 +69,10 @@ public class AuthServiceImpl implements AuthService {
     public LoginResponse login(LoginRequest request) {
 
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() ->
-                        new UnauthorizedException("Invalid email or password")
-                );
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new UnauthorizedException("Invalid email or password");
+            throw new RuntimeException("Invalid password");
         }
 
         String token = jwtService.generateToken(user);

@@ -1,6 +1,10 @@
 package com.example.PersonalFinanceTracker.security;
 
 import com.example.PersonalFinanceTracker.exception.UnauthorizedException;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.SignatureException;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +26,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final CustomUserDetailsService userDetailsService;
+
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -58,7 +63,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
 
-            } catch (Exception e) {
+            } catch (ExpiredJwtException e) {
+                throw new UnauthorizedException("Token has expired");
+            } catch (MalformedJwtException e) {
+                throw new UnauthorizedException("Invalid token format");
+            } catch (SignatureException e) {
+                throw new UnauthorizedException("Token signature is invalid");
+            } catch (JwtException e) {
                 throw new UnauthorizedException("Invalid token");
             }
         }

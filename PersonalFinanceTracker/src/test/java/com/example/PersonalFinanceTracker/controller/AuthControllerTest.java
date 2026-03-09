@@ -19,10 +19,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.Map;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
-
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -48,9 +49,9 @@ class AuthControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    // ===============================
-    // REGISTER SUCCESS
-    // ===============================
+    /**
+     * Test đăng ký thành công
+     */
     @Test
     void register_success() throws Exception {
 
@@ -69,19 +70,20 @@ class AuthControllerTest {
                 )
         );
 
-        when(authService.register(any())).thenReturn(response);
+        when(authService.register(any(RegisterRequest.class))).thenReturn(response);
 
         mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.userId").value(1L));
+                .andExpect(jsonPath("$.data.fullName").value("Nguyen Van A"))
+                .andExpect(jsonPath("$.data.email").value("user@example.com"));
     }
 
-    // ===============================
-    // REGISTER EMAIL EXISTS
-    // ===============================
+    /**
+     * Test đăng ký thất bại do email đã tồn tại
+     */
     @Test
     void register_fail_email_exists() throws Exception {
 
@@ -90,18 +92,18 @@ class AuthControllerTest {
         request.setEmail("user@example.com");
         request.setPassword("abc12345");
 
-        doThrow(new ApiException(HttpStatus.CONFLICT, "Email is already registered"))
+        doThrow(new ApiException(HttpStatus.BAD_REQUEST, "Email already exists"))
                 .when(authService).register(any());
 
         mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isConflict());
+                .andExpect(status().isBadRequest());
     }
 
-    // ===============================
-    // LOGIN SUCCESS
-    // ===============================
+    /**
+     * Test login thành công
+     */
     @Test
     void login_success() throws Exception {
 
@@ -116,7 +118,7 @@ class AuthControllerTest {
                 "2025-05-12T15:30:00Z"
         );
 
-        when(authService.login(any())).thenReturn(response);
+        when(authService.login(any(LoginRequest.class))).thenReturn(response);
 
         mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -125,9 +127,9 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.data.accessToken").value("jwt_token_123"));
     }
 
-    // ===============================
-    // LOGIN WRONG PASSWORD
-    // ===============================
+    /**
+     * Test login sai mật khẩu
+     */
     @Test
     void login_wrong_password() throws Exception {
 
@@ -135,7 +137,7 @@ class AuthControllerTest {
         request.setEmail("user@example.com");
         request.setPassword("wrong123");
 
-        doThrow(new UnauthorizedException("Invalid email or password"))
+        doThrow(new UnauthorizedException("Wrong password"))
                 .when(authService).login(any());
 
         mockMvc.perform(post("/api/auth/login")

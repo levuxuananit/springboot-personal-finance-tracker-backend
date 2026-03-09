@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * JwtService
@@ -29,15 +31,20 @@ public class JwtService {
     }
 
     /**
-     * Generate JWT Token
+     * Tạo JWT token
      */
     public String generateToken(User user) {
+
+        Map<String, Object> claims = new HashMap<>();
+
+        // thêm role vào token (không bắt buộc nhưng nên giữ)
+        claims.put("role", user.getRole().getName());
+
         return Jwts.builder()
-                .setSubject(user.getEmail()) // subject = email
-                .claim("userId", user.getId())
-                .claim("fullName", user.getFullName())
+                .setClaims(claims)
+                .setSubject(user.getEmail()) // email làm username
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 3600000)) // 1 giờ
+                .setExpiration(new Date(System.currentTimeMillis() + 86400000)) // 1 ngày
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -50,11 +57,11 @@ public class JwtService {
     }
 
     /**
-     * Lấy toàn bộ claims từ JWT
+     * Lấy toàn bộ claims
      */
     private Claims extractAllClaims(String token) {
         return Jwts.parser()
-                .setSigningKey(getSigningKey()) // dùng key của bạn
+                .setSigningKey(getSigningKey())
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
@@ -65,7 +72,7 @@ public class JwtService {
      */
     public boolean isTokenValid(String token, User user) {
         final String email = extractEmail(token);
-        return (email.equals(user.getEmail()) && !isTokenExpired(token));
+        return email.equals(user.getEmail()) && !isTokenExpired(token);
     }
 
     /**

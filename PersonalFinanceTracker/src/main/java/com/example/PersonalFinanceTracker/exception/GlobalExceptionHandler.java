@@ -49,17 +49,4 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(ex.getStatus()).body(response);
     }
-    /**
-     * Xử lý sai mật khẩu / chưa đăng nhập
-     * -> HTTP 401
-     */
-    @ExceptionHandler(UnauthorizedException.class)
-    public ResponseEntity<?> handleUnauthorized(UnauthorizedException ex) {
-        return ResponseEntity
-                .status(HttpStatus.UNAUTHORIZED)
-                .body(Map.of(
-                        "success", false,
-                        "message", ex.getMessage()
-                ));
-    }
 }

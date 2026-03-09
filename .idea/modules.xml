@@ -2,7 +2,11 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+<<<<<<< HEAD
       <module fileurl="file://$PROJECT_DIR$/.idea/PersonalFinanceTracker.iml" filepath="$PROJECT_DIR$/.idea/PersonalFinanceTracker.iml" />
+=======
+      <module fileurl="file://$PROJECT_DIR$/.idea/springboot-personal-finance-tracker-backend-main.iml" filepath="$PROJECT_DIR$/.idea/springboot-personal-finance-tracker-backend-main.iml" />
+>>>>>>> feature/report
     </modules>
   </component>
 </project>
