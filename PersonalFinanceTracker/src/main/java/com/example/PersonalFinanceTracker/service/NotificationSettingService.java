@@ -1,12 +1,8 @@
 package com.example.PersonalFinanceTracker.service;
 
-<<<<<<< HEAD
+
 import com.example.PersonalFinanceTracker.dto.NotificationSettingsUpdateRequest;
 import com.example.PersonalFinanceTracker.dto.NotificationSettingsResponse;
-=======
-import com.example.PersonalFinanceTracker.dto.request.NotificationSettingsUpdateRequest;
-import com.example.PersonalFinanceTracker.dto.response.NotificationSettingsResponse;
->>>>>>> feature/budget-list
 import com.example.PersonalFinanceTracker.entity.NotificationSetting;
 import com.example.PersonalFinanceTracker.entity.User;
 import com.example.PersonalFinanceTracker.exception.ResourceNotFoundException;
@@ -78,7 +74,3 @@ public class NotificationSettingService {
         );
     }
 }
-<<<<<<< HEAD
-=======
-
->>>>>>> feature/budget-list

@@ -1,14 +1,10 @@
 package com.example.PersonalFinanceTracker.controller;
 
-<<<<<<< HEAD
+
 import com.example.PersonalFinanceTracker.dto.NotificationSettingsUpdateRequest;
 import com.example.PersonalFinanceTracker.dto.ApiResponse;
 import com.example.PersonalFinanceTracker.dto.NotificationSettingsResponse;
-=======
-import com.example.PersonalFinanceTracker.dto.request.NotificationSettingsUpdateRequest;
-import com.example.PersonalFinanceTracker.dto.response.ApiResponse;
-import com.example.PersonalFinanceTracker.dto.response.NotificationSettingsResponse;
->>>>>>> feature/budget-list
+
 import com.example.PersonalFinanceTracker.service.NotificationSettingService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -45,9 +41,6 @@ public class NotificationSettingController {
         NotificationSettingsResponse data = notificationSettingService.updateSettings(userId, request);
         return ResponseEntity.ok(new ApiResponse<>(true, "Notification settings updated successfully", data));
     }
-<<<<<<< HEAD
-}
-=======
+
 }
 
->>>>>>> feature/budget-list

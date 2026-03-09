@@ -1,7 +1,8 @@
+
 package com.example.PersonalFinanceTracker.repository;
 
 import com.example.PersonalFinanceTracker.entity.Category;
-<<<<<<< HEAD
+
 import com.example.PersonalFinanceTracker.entity.CategoryType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -21,9 +22,3 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
 
     boolean existsByUserIdAndNameIgnoreCase(Long userId, String name);
 }
-=======
-import org.springframework.data.jpa.repository.JpaRepository;
-
-public interface CategoryRepository extends JpaRepository<Category, Long> {}
-
->>>>>>> feature/budget-list

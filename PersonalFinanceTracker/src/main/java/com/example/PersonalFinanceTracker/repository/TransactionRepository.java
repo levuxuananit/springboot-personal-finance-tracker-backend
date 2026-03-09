@@ -1,11 +1,14 @@
 package com.example.PersonalFinanceTracker.repository;
 
+import com.example.PersonalFinanceTracker.entity.CategoryType;
 import com.example.PersonalFinanceTracker.entity.Transaction;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import org.springframework.data.domain.Pageable;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -50,4 +53,5 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 
     List<Transaction> findByUserId(Long userId);
 
+    List<Transaction> findByUserTypeAndDateBetween(Long id, CategoryType categoryType, LocalDate startDate, LocalDate endDate);
 }

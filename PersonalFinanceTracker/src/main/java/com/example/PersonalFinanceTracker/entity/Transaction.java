@@ -1,13 +1,12 @@
 package com.example.PersonalFinanceTracker.entity;
 
-<<<<<<< HEAD
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
 
-=======
+
 import java.time.LocalDate;
 
 import jakarta.persistence.Entity;
@@ -20,8 +19,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+import org.slf4j.Logger;
 
->>>>>>> feature/budget-list
 @Entity
 @Table(name = "transactions")
 @Getter
@@ -45,4 +44,6 @@ public class Transaction {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
+
+
 }
