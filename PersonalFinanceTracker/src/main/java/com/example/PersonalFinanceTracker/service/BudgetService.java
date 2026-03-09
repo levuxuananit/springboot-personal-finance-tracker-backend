@@ -1,7 +1,12 @@
 package com.example.PersonalFinanceTracker.service;
 
+<<<<<<< HEAD
 import com.example.PersonalFinanceTracker.dto.BudgetCreateRequest;
 import com.example.PersonalFinanceTracker.dto.BudgetResponse;
+=======
+import com.example.PersonalFinanceTracker.dto.request.BudgetCreateRequest;
+import com.example.PersonalFinanceTracker.dto.response.BudgetResponse;
+>>>>>>> feature/budget-list
 import com.example.PersonalFinanceTracker.entity.Budget;
 import com.example.PersonalFinanceTracker.entity.Category;
 import com.example.PersonalFinanceTracker.entity.User;
@@ -71,4 +76,9 @@ public class BudgetService {
                 userId
         );
     }
+<<<<<<< HEAD
 }
+=======
+}
+
+>>>>>>> feature/budget-list

@@ -2,6 +2,7 @@
 /shelf/
 /workspace.xml
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 # Ignored default folder with query files
 /queries/
@@ -11,3 +12,5 @@
 # Editor-based HTTP Client requests
 /httpRequests/
 >>>>>>> feature/report
+=======
+>>>>>>> feature/budget-list

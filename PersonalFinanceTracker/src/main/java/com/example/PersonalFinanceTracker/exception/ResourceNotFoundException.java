@@ -5,3 +5,7 @@ public class ResourceNotFoundException extends RuntimeException {
         super(message);
     }
 }
+<<<<<<< HEAD
+=======
+
+>>>>>>> feature/budget-list

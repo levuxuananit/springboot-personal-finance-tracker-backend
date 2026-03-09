@@ -1,7 +1,12 @@
 package com.example.PersonalFinanceTracker.controller;
 
+<<<<<<< HEAD
 import com.example.PersonalFinanceTracker.dto.BudgetCreateRequest;
 import com.example.PersonalFinanceTracker.dto.BudgetResponse;
+=======
+import com.example.PersonalFinanceTracker.dto.request.BudgetCreateRequest;
+import com.example.PersonalFinanceTracker.dto.response.BudgetResponse;
+>>>>>>> feature/budget-list
 import com.example.PersonalFinanceTracker.service.BudgetService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -34,4 +39,9 @@ public class BudgetController {
     public ResponseEntity<List<BudgetResponse>> getAll() {
         return ResponseEntity.ok(budgetService.getAll());
     }
+<<<<<<< HEAD
 }
+=======
+}
+
+>>>>>>> feature/budget-list
