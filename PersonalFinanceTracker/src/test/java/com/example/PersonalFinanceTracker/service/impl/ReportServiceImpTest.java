@@ -12,6 +12,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.io.File;
+import java.math.BigDecimal;
 import java.util.List;
 
 import static org.mockito.Mockito.*;
@@ -40,16 +41,16 @@ class ReportServiceImpTest {
         request.setYear(2026);
 
         when(transactionRepository.getTotalIncome(userId, 3, 2026))
-                .thenReturn(5000.0);
+                .thenReturn(BigDecimal.valueOf(5000));
 
         when(transactionRepository.getTotalExpense(userId, 3, 2026))
-                .thenReturn(2000.0);
+                .thenReturn(BigDecimal.valueOf(2000));
 
         when(transactionRepository.getTotalIncome(userId, 2, 2026))
-                .thenReturn(4000.0);
+                .thenReturn(BigDecimal.valueOf(4000));
 
         when(transactionRepository.getTotalExpense(userId, 2, 2026))
-                .thenReturn(1500.0);
+                .thenReturn(BigDecimal.valueOf(15000));
 
         List<Object[]> topExpenses = List.of(
                 new Object[]{"Food", 800.0},
@@ -83,10 +84,10 @@ class ReportServiceImpTest {
         request.setYear(2026);
 
         when(transactionRepository.getTotalIncome(userId, 3, 2026))
-                .thenReturn(5000.0);
+                .thenReturn(BigDecimal.valueOf(5000));
 
         when(transactionRepository.getTotalExpense(userId, 3, 2026))
-                .thenReturn(0.0);
+                .thenReturn(BigDecimal.valueOf(0));
 
         when(transactionRepository.getTopExpenses(eq(userId), eq(3), eq(2026), any()))
                 .thenReturn(List.of());

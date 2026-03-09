@@ -16,7 +16,7 @@ import java.util.List;
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
 
-    // --- Chức năng Dashboard & Thống kê theo Tháng/Năm (Từ HEAD) ---
+    // --- Chức năng Dashboard & Thống kê theo Tháng/Năm ---
 
     @Query("""
             SELECT SUM(t.amount)
@@ -27,7 +27,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
             AND MONTH(t.date) = :month
             AND YEAR(t.date) = :year
             """)
-    Double getTotalIncome(@Param("userId") Long userId, @Param("month") int month, @Param("year") int year);
+    BigDecimal  getTotalIncome(Long userId, int month, int year);
 
     @Query("""
             SELECT SUM(t.amount)
@@ -38,7 +38,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
             AND MONTH(t.date) = :month
             AND YEAR(t.date) = :year
             """)
-    Double getTotalExpense(@Param("userId") Long userId, @Param("month") int month, @Param("year") int year);
+    BigDecimal getTotalExpense(@Param("userId") Long userId, @Param("month") int month, @Param("year") int year);
 
     @Query("""
                 SELECT c.name, SUM(t.amount)
@@ -54,7 +54,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     List<Object[]> getTopExpenses(@Param("userId") Long userId, @Param("month") int month, @Param("year") int year, Pageable pageable);
 
 
-    // --- Chức năng Dashboard theo Khoảng ngày (Từ feature/create-transaction) ---
+    // --- Chức năng Dashboard theo Khoảng ngày ---
 
     @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t " +
             "WHERE t.user.id = :userId " +
@@ -84,7 +84,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate);
 
-    // --- Lịch sử giao dịch có phân trang & lọc (Từ feature/create-transaction) ---
+    // --- Lịch sử giao dịch có phân trang & lọc ---
 
     @Query("SELECT t FROM Transaction t WHERE t.user.id = :userId " +
             "AND (:startDate IS NULL OR t.date >= :startDate) " +

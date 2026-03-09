@@ -5,14 +5,16 @@ import com.example.PersonalFinanceTracker.entity.Transaction;
 import com.example.PersonalFinanceTracker.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import java.math.BigDecimal;
+
 
 import com.lowagie.text.Document;
 import com.lowagie.text.Paragraph;
 import com.lowagie.text.pdf.PdfWriter;
 import com.lowagie.text.pdf.PdfPTable;
 
-import java.io.File;
 import java.io.FileOutputStream;
 import java.util.List;
 import java.util.Optional;
@@ -20,79 +22,40 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class ReportServiceImp {
-
     private final TransactionRepository transactionRepository;
 
     public String exportSummaryPdf(Long userId, ExportReportRequest request) throws Exception {
 
-        Double income = Optional.ofNullable(
+        BigDecimal income = Optional.ofNullable(
                 transactionRepository.getTotalIncome(userId, request.getMonth(), request.getYear())
-        ).orElse(0.0);
+        ).orElse(BigDecimal.ZERO);
 
-        Double expense = Optional.ofNullable(
+        BigDecimal expense = Optional.ofNullable(
                 transactionRepository.getTotalExpense(userId, request.getMonth(), request.getYear())
-        ).orElse(0.0);
+        ).orElse(BigDecimal.ZERO);
 
-        double balance = income - expense;
-
-        // ===== Previous month =====
-        int prevMonth = request.getMonth() == 1 ? 12 : request.getMonth() - 1;
-        int prevYear = request.getMonth() == 1 ? request.getYear() - 1 : request.getYear();
-
-        Double prevIncome = Optional.ofNullable(
-                transactionRepository.getTotalIncome(userId, prevMonth, prevYear)
-        ).orElse(0.0);
-
-        Double prevExpense = Optional.ofNullable(
-                transactionRepository.getTotalExpense(userId, prevMonth, prevYear)
-        ).orElse(0.0);
-
-        double prevBalance = prevIncome - prevExpense;
+        BigDecimal balance = income.subtract(expense);
 
         List<Object[]> topExpenses =
-                transactionRepository.getTopExpenses(
-                        userId,
+                transactionRepository.getTopExpenses(userId,
                         request.getMonth(),
                         request.getYear(),
-                        PageRequest.of(0, 3)
-                );
+                        (Pageable) PageRequest.of(0, 3));
 
         String fileName = "report_" + userId + "_" + request.getMonth() + "_" + request.getYear() + ".pdf";
+        String path = "reports/" + fileName;
 
-        generatePdf(
-                fileName,
-                income,
-                expense,
-                balance,
-                prevIncome,
-                prevExpense,
-                prevBalance,
-                topExpenses,
-                request
-        );
+        generatePdf(path, income, expense, balance, topExpenses);
 
-        return "reports/" + fileName;
+        return path;
+
     }
 
-
-    private void generatePdf(String fileName,
-                             double income,
-                             double expense,
-                             double balance,
-                             double prevIncome,
-                             double prevExpense,
-                             double prevBalance,
-                             List<Object[]> topExpenses,
-                             ExportReportRequest request) throws Exception {
-
-        String folderPath = "reports";
-        File folder = new File(folderPath);
-
-        if (!folder.exists()) {
-            folder.mkdirs();
-        }
-
-        String path = folderPath + "/" + fileName;
+    private void generatePdf(String path,
+                             BigDecimal income,
+                             BigDecimal expense,
+                             BigDecimal balance,
+                             List<Object[]> topExpenses) throws Exception {
 
         Document document = new Document();
         PdfWriter.getInstance(document, new FileOutputStream(path));
@@ -102,57 +65,34 @@ public class ReportServiceImp {
         document.add(new Paragraph("MONTHLY FINANCIAL SUMMARY"));
         document.add(new Paragraph(" "));
 
-        // ===== A. SUMMARY =====
-        document.add(new Paragraph("A. Monthly Summary"));
-
-        PdfPTable summaryTable = new PdfPTable(2);
-
-        summaryTable.addCell("Item");
-        summaryTable.addCell("Value");
-
-        summaryTable.addCell("Income");
-        summaryTable.addCell(String.format("$%,.0f",income));
-
-        summaryTable.addCell("Expenses");
-        summaryTable.addCell(String.format("$%,.0f",expense));
-
-        summaryTable.addCell("Balance");
-        summaryTable.addCell(String.format("$%,.0f",balance));
-
-        summaryTable.addCell("Status");
-        summaryTable.addCell(balance >= 0 ? "Surplus" : "Deficit");
-
-        document.add(summaryTable);
+        document.add(new Paragraph("Income: $" + income));
+        document.add(new Paragraph("Expense: $" + expense));
+        document.add(new Paragraph("Balance: $" + balance));
 
         document.add(new Paragraph(" "));
+        document.add(new Paragraph("Top 3 Expenses"));
 
-        // ===== B. TOP EXPENSES =====
-        if (expense > 1) {
+        PdfPTable table = new PdfPTable(2);
 
-            document.add(new Paragraph("B. Top 3 Expenses"));
+        table.addCell("Category");
+        table.addCell("Amount");
 
-            PdfPTable table = new PdfPTable(3);
+        for (Object[] row : topExpenses) {
 
-            table.addCell("Category");
-            table.addCell("Amount");
-            table.addCell("Percentage");
-
-            for (Object[] row : topExpenses) {
-
-                double amount = Double.parseDouble(row[1].toString());
-                double percent = expense == 0 ? 0 : (amount / expense) * 100;
-
-                table.addCell(row[0].toString());
-                table.addCell("$" + amount);
-                table.addCell(String.format("%.1f%%", percent));
-            }
-
-            document.add(table);
+            table.addCell(row[0].toString());
+            table.addCell(row[1].toString());
         }
 
-        document.add(new Paragraph(" "));
+        document.add(table);
 
         document.close();
+    }
+
+    public byte[] generateMonthlyReport(Long userId) {
+
+        List<Transaction> transactions =
+                transactionRepository.findByUserId(userId);
+        return new byte[0];
     }
 
 }
