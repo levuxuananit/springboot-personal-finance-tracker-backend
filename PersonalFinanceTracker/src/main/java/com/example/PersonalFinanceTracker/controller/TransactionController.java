@@ -31,4 +31,23 @@ public class TransactionController {
         return ResponseEntity.status(HttpStatus.CREATED).body(body);
     }
 
+    @GetMapping("/history")
+    public ResponseEntity<?> getHistory(
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate,
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(defaultValue = "1")  int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        PagedResponseDTO<TransactionResponseDTO> result =
+                transactionService.getHistory(startDate, endDate, type, categoryId, page, size);
+
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("success", true);
+        body.put("message", "Transaction history fetched successfully");
+        body.put("data", result.getData());
+        body.put("pagination", result.getPagination());
+        return ResponseEntity.ok(body);
+    }
 }
