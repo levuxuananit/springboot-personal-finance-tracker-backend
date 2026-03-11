@@ -26,7 +26,6 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class TransactionService {
-
     private final TransactionRepository transactionRepository;
     private final CategoryRepository categoryRepository;
     private final AuthUtil authUtil;
@@ -47,6 +46,57 @@ public class TransactionService {
         transaction.setDate(parseDate(request.getDate()));
 
         return toDTO(transactionRepository.save(transaction));
+    }
+
+    /**
+     * Lấy lịch sử giao dịch có phân trang.
+     * page bắt đầu từ 1 (theo spec), chuyển sang 0-based cho Spring Pageable.
+     */
+    @Transactional(readOnly = true)
+    public PagedResponseDTO<TransactionResponseDTO> getHistory(
+            String startDate, String endDate,
+            String type, Long categoryId,
+            int page, int size) {
+
+        User user = authUtil.getCurrentUser();
+
+        LocalDate start = (startDate != null) ? parseDate(startDate) : null;
+        LocalDate end   = (endDate   != null) ? parseDate(endDate)   : null;
+
+        if (start != null && end != null && start.isAfter(end)) {
+            throw new UnprocessableException("startDate must not be after endDate");
+        }
+
+        if (page < 1) throw new UnprocessableException("Page must be >= 1");
+        if (size < 1) throw new UnprocessableException("Size must be >= 1");
+
+        CategoryType categoryType = null;
+        if (type != null && !type.isBlank()) {
+            try {
+                categoryType = CategoryType.valueOf(type.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                throw new UnprocessableException("Type must be INCOME or EXPENSE");
+            }
+        }
+
+        // Spec dùng page bắt đầu từ 1, Spring Pageable bắt đầu từ 0
+        Pageable pageable = PageRequest.of(page - 1, size);
+
+        Page<Transaction> pageResult = transactionRepository
+                .findHistory(user.getId(), start, end, categoryType, categoryId, pageable);
+
+        List<TransactionResponseDTO> data = pageResult.getContent()
+                .stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+
+        PagedResponseDTO.PaginationMeta meta = new PagedResponseDTO.PaginationMeta(
+                page,
+                pageResult.getTotalPages(),
+                pageResult.getTotalElements()
+        );
+
+        return new PagedResponseDTO<>(data, meta);
     }
 
     private LocalDate parseDate(String dateStr) {
