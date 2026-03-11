@@ -7,54 +7,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
-@Repository
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
 
-    // --- Chức năng Dashboard & Thống kê theo Tháng/Năm ---
-
-    @Query("""
-            SELECT SUM(t.amount)
-            FROM Transaction t
-            JOIN t.category c
-            WHERE t.user.id = :userId
-            AND c.type = 'INCOME'
-            AND MONTH(t.date) = :month
-            AND YEAR(t.date) = :year
-            """)
-    BigDecimal  getTotalIncome(Long userId, int month, int year);
-
-    @Query("""
-            SELECT SUM(t.amount)
-            FROM Transaction t
-            JOIN t.category c
-            WHERE t.user.id = :userId
-            AND c.type = 'EXPENSE'
-            AND MONTH(t.date) = :month
-            AND YEAR(t.date) = :year
-            """)
-    BigDecimal getTotalExpense(@Param("userId") Long userId, @Param("month") int month, @Param("year") int year);
-
-    @Query("""
-                SELECT c.name, SUM(t.amount)
-                FROM Transaction t
-                JOIN t.category c
-                WHERE t.user.id = :userId
-                AND c.type = 'EXPENSE'
-                AND MONTH(t.date) = :month
-                AND YEAR(t.date) = :year
-                GROUP BY c.name
-                ORDER BY SUM(t.amount) DESC
-            """)
-    List<Object[]> getTopExpenses(@Param("userId") Long userId, @Param("month") int month, @Param("year") int year, Pageable pageable);
-
-
-    // --- Chức năng Dashboard theo Khoảng ngày ---
+    // ─── Dashboard queries (date range → index-friendly) ────────────────────
 
     @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t " +
             "WHERE t.user.id = :userId " +
@@ -78,13 +38,13 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     @Query("SELECT t FROM Transaction t " +
             "WHERE t.user.id = :userId " +
             "AND t.date BETWEEN :startDate AND :endDate " +
-            "ORDER BY t.date DESC")
+            "ORDER BY t.date DESC LIMIT 3")
     List<Transaction> findTop3ByUserAndDateBetween(
             @Param("userId") Long userId,
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate);
 
-    // --- Lịch sử giao dịch có phân trang & lọc ---
+    // ─── History query with pagination ──────────────────────────────────────
 
     @Query("SELECT t FROM Transaction t WHERE t.user.id = :userId " +
             "AND (:startDate IS NULL OR t.date >= :startDate) " +
@@ -100,10 +60,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
             @Param("categoryId") Long categoryId,
             Pageable pageable);
 
-    // --- Các hàm hỗ trợ Report ---
-
-    List<Transaction> findByUserId(Long userId);
-
+    // Dùng cho report/category — lấy tất cả transaction theo type + date range
     @Query("SELECT t FROM Transaction t " +
             "WHERE t.user.id = :userId " +
             "AND t.category.type = :type " +
@@ -114,6 +71,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate);
 
+    // Dùng cho report/monthly — lấy tất cả transaction trong cả năm
     @Query("SELECT t FROM Transaction t " +
             "WHERE t.user.id = :userId " +
             "AND t.date BETWEEN :startDate AND :endDate")
