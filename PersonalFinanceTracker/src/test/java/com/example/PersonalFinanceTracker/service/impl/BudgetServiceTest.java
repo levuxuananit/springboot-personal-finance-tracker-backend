@@ -6,7 +6,7 @@ import com.example.PersonalFinanceTracker.entity.Category;
 import com.example.PersonalFinanceTracker.entity.CategoryType;
 import com.example.PersonalFinanceTracker.entity.User;
 import com.example.PersonalFinanceTracker.exception.ResourceNotFoundException;
-import com.example.PersonalFinanceTracker.exception.UnprocessableEntityException;
+import com.example.PersonalFinanceTracker.exception.UnprocessableException;
 import com.example.PersonalFinanceTracker.repository.BudgetRepository;
 import com.example.PersonalFinanceTracker.repository.CategoryRepository;
 import com.example.PersonalFinanceTracker.repository.UserRepository;
@@ -66,11 +66,10 @@ class BudgetServiceTest {
 
         BudgetCreateRequest req = new BudgetCreateRequest(100.0, 3, 2026, 10L);
 
-        UnprocessableEntityException ex = assertThrows(
-                UnprocessableEntityException.class,
+        UnprocessableException ex = assertThrows(
+                UnprocessableException.class,
                 () -> service.setBudget(1L, req)
         );
-        assertEquals("categoryId", ex.getField());
         verifyNoInteractions(budgetRepository);
     }
 

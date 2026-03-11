@@ -2,6 +2,8 @@ package com.example.PersonalFinanceTracker.testutil;
 
 import com.example.PersonalFinanceTracker.dto.CategoryRequestDTO;
 import com.example.PersonalFinanceTracker.dto.CategoryResponseDTO;
+import com.example.PersonalFinanceTracker.dto.ProfileRequest;
+import com.example.PersonalFinanceTracker.dto.ProfileResponse;
 import com.example.PersonalFinanceTracker.dto.TransactionRequestDTO;
 import com.example.PersonalFinanceTracker.dto.TransactionResponseDTO;
 import com.example.PersonalFinanceTracker.dto.auth.LoginRequest;
@@ -168,5 +170,30 @@ public class TestDataFactory {
                                                                 Long categoryId,
                                                                 String date) {
         return buildTransactionRequest(amount, null, categoryId, date);
+    }
+
+    // ─── ProfileRequest builders ──────────────────────────────────────────────
+
+    public static ProfileRequest buildProfileRequest(String fullName, String avatar) {
+        ProfileRequest req = new ProfileRequest();
+        req.setFullName(fullName);
+        req.setAvatar(avatar);
+        return req;
+    }
+
+    public static ProfileRequest buildProfileRequest(String fullName) {
+        return buildProfileRequest(fullName, null);
+    }
+
+    // ─── ProfileResponse builders ─────────────────────────────────────────────
+
+    public static ProfileResponse buildProfileResponse(Long userId, String fullName,
+                                                       String email, String avatar) {
+        return new ProfileResponse(userId, fullName, email, avatar);
+    }
+
+    public static ProfileResponse defaultProfileResponse() {
+        return buildProfileResponse(1L, "Nguyen Van A", "user@example.com",
+                "https://cdn.example.com/avatars/user123.png");
     }
 }

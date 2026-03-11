@@ -5,19 +5,19 @@ import com.example.PersonalFinanceTracker.dto.ProfileResponse;
 import com.example.PersonalFinanceTracker.entity.User;
 import com.example.PersonalFinanceTracker.repository.UserRepository;
 import com.example.PersonalFinanceTracker.service.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class ProfileServiceImpl implements UserService {
+
     private final UserRepository userRepository;
 
-    public ProfileServiceImpl(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
-
     @Override
-    public ProfileResponse updateProfile(Long userId, ProfileRequest request) {
-        User user = userRepository.findById(userId)
+    public ProfileResponse updateProfileByEmail(String email, ProfileRequest request) {
+
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         user.setFullName(request.getFullName());
