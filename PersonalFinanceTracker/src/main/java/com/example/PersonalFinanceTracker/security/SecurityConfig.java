@@ -33,7 +33,6 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth ->
                         auth.requestMatchers("/api/auth/**").permitAll()
-                                .requestMatchers("/api/reports/**").hasAnyRole("USER","ADMIN")
                                 .anyRequest().authenticated()
                 )
 
