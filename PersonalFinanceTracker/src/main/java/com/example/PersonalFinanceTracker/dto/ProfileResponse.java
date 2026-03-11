@@ -6,8 +6,10 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class ProfileResponse {
-    private Long useId;
+
+    private Long userId;
     private String fullName;
     private String email;
     private String avatar;
+
 }

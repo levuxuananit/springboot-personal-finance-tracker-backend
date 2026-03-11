@@ -1,7 +1,14 @@
 package com.example.PersonalFinanceTracker.dto;
 
-public record ApiResponse<T>(
-        boolean success,
-        String message,
-        T data
-) {}
+import lombok.AllArgsConstructor;
+import lombok.Data;
+
+@Data
+@AllArgsConstructor
+public class ApiResponse<T> {
+
+    private boolean success;
+    private String message;
+    private T data;
+
+}
