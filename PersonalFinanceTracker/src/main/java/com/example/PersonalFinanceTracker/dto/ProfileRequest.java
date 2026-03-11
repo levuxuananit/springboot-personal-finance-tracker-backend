@@ -8,9 +8,14 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ProfileRequest {
+
     @NotBlank(message = "Full name is required")
     private String fullName;
 
-    @Pattern(regexp = "^http|https://.*$", message = "Invalid avatar URL")
+    @Pattern(
+            regexp = "^(http|https)://.*$",
+            message = "Invalid avatar URL"
+    )
     private String avatar;
+
 }
