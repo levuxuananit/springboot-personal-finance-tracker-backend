@@ -8,6 +8,7 @@ import com.example.PersonalFinanceTracker.exception.ApiException;
 import com.example.PersonalFinanceTracker.exception.UnauthorizedException;
 import com.example.PersonalFinanceTracker.service.AuthService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -19,16 +20,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Map;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
- * Test Controller Auth (register + login)
+ * Unit test for AuthController
  */
 @WebMvcTest(
         controllers = AuthController.class,
@@ -49,10 +49,12 @@ class AuthControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    /**
-     * Test đăng ký thành công
-     */
+    // =================================================
+    // REGISTER TESTS
+    // =================================================
+
     @Test
+    @DisplayName("Register success")
     void register_success() throws Exception {
 
         RegisterRequest request = new RegisterRequest();
@@ -70,41 +72,84 @@ class AuthControllerTest {
                 )
         );
 
-        when(authService.register(any(RegisterRequest.class))).thenReturn(response);
+        when(authService.register(any())).thenReturn(response);
 
         mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.fullName").value("Nguyen Van A"))
-                .andExpect(jsonPath("$.data.email").value("user@example.com"));
+                .andExpect(jsonPath("$.data.userId").value(1L));
     }
 
-    /**
-     * Test đăng ký thất bại do email đã tồn tại
-     */
     @Test
-    void register_fail_email_exists() throws Exception {
+    @DisplayName("Register fail when email already exists")
+    void register_email_exists() throws Exception {
 
         RegisterRequest request = new RegisterRequest();
         request.setFullName("Nguyen Van A");
         request.setEmail("user@example.com");
         request.setPassword("abc12345");
 
-        doThrow(new ApiException(HttpStatus.BAD_REQUEST, "Email already exists"))
+        doThrow(new ApiException(HttpStatus.CONFLICT, "Email is already registered"))
                 .when(authService).register(any());
 
         mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isConflict());
     }
 
-    /**
-     * Test login thành công
-     */
     @Test
+    @DisplayName("Register fail when email format invalid")
+    void register_invalid_email() throws Exception {
+
+        RegisterRequest request = new RegisterRequest();
+        request.setFullName("Nguyen Van A");
+        request.setEmail("invalid_email");
+        request.setPassword("abc12345");
+
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnprocessableEntity());
+    }
+
+    @Test
+    @DisplayName("Register fail when password too short")
+    void register_password_too_short() throws Exception {
+
+        RegisterRequest request = new RegisterRequest();
+        request.setFullName("Nguyen Van A");
+        request.setEmail("user@example.com");
+        request.setPassword("123");
+
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnprocessableEntity());
+    }
+
+    @Test
+    @DisplayName("Register fail when email missing")
+    void register_missing_email() throws Exception {
+
+        RegisterRequest request = new RegisterRequest();
+        request.setFullName("Nguyen Van A");
+        request.setPassword("abc12345");
+
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnprocessableEntity());
+    }
+
+    // =================================================
+    // LOGIN TESTS
+    // =================================================
+
+    @Test
+    @DisplayName("Login success")
     void login_success() throws Exception {
 
         LoginRequest request = new LoginRequest();
@@ -118,7 +163,7 @@ class AuthControllerTest {
                 "2025-05-12T15:30:00Z"
         );
 
-        when(authService.login(any(LoginRequest.class))).thenReturn(response);
+        when(authService.login(any())).thenReturn(response);
 
         mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -127,22 +172,60 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.data.accessToken").value("jwt_token_123"));
     }
 
-    /**
-     * Test login sai mật khẩu
-     */
     @Test
+    @DisplayName("Login fail when wrong password")
     void login_wrong_password() throws Exception {
 
         LoginRequest request = new LoginRequest();
         request.setEmail("user@example.com");
         request.setPassword("wrong123");
 
-        doThrow(new UnauthorizedException("Wrong password"))
+        doThrow(new UnauthorizedException("Invalid email or password"))
                 .when(authService).login(any());
 
         mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("Login fail when email not found")
+    void login_email_not_found() throws Exception {
+
+        LoginRequest request = new LoginRequest();
+        request.setEmail("notfound@example.com");
+        request.setPassword("abc12345");
+
+        doThrow(new UnauthorizedException("Invalid email or password"))
+                .when(authService).login(any());
+
+        mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("Login fail when password missing")
+    void login_missing_password() throws Exception {
+
+        LoginRequest request = new LoginRequest();
+        request.setEmail("user@example.com");
+
+        mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnprocessableEntity());
+    }
+
+    @Test
+    @DisplayName("Login fail when request body empty")
+    void login_empty_body() throws Exception {
+
+        mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isUnprocessableEntity());
     }
 }
